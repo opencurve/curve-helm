@@ -1,0 +1,18 @@
+apiVersion: v2
+name: curvefs
+description: A Helm chart for CurveFS cluster
+type: application
+version: 0.0.1
+appVersion: "0.0.1-beta"
+home: https://github.com/opencurve/curve-helm
+sources:
+  - https://github.com/opencurve/curve-helm
+icon: https://raw.githubusercontent.com/opencurve/curve/master/docs/images/curve-logo1.png
+keywords:
+  - filesystem
+  - storage
+  - distributed
+  - raft
+maintainers:
+- name: "Jingli Chen"
+  email: wine93.info@gmail.com

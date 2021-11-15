@@ -1,0 +1,45 @@
+global:
+  image: opencurvedocker/curvefs:beta
+  imagePullPolicy: IfNotPresent
+  prefix: /usr/local/curvefs
+
+etcd:
+  enabled: true
+  replicas: 3
+  nodeSelector:
+    curvefs-etcd: true
+  port: 2380
+  clientPort: 2379
+  # logDir: /mnt/log
+  # dataDir: /mnt/data
+  config:
+    debug: false
+
+mds:
+  enabled: true
+  replicas: 3
+  nodeSelector:
+    curvefs-mds: true
+  port: 6700
+  dummyPort: 7700
+  # logDir: /mnt/log
+  # dataDir: /mnt/data
+  config:
+    mds.heartbeat.intervalMs: 10000
+
+metaserver:
+  enabled: false
+  nodeSelector:
+    curvefs-metaserver: true
+  port: 6701
+  # logDir: /mnt/log
+  # dataDir: /mnt/data
+  # resources:
+  #   limits:
+  #     memory: "32Gi"
+  #     cpu: "8000m"
+  #   requests:
+  #     memory: "8Gi"
+  #     cpu: "2000m"
+  config:
+    metaserver.loglevel: 0

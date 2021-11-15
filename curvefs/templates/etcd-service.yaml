@@ -1,0 +1,21 @@
+{{- if .Values.etcd.enabled }}
+{{- $g_role := "etcd" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: etcd-service
+spec:
+  type: ClusterIP
+  clusterIP: None  # headless service
+  ports:
+    - name: etcd-server
+      port: {{ .Values.etcd.port }}
+      targetPort: {{ .Values.etcd.port }}
+      protocol: TCP
+    - name: etcd-client
+      port: {{ .Values.etcd.clientPort }}
+      targetPort: {{ .Values.etcd.clientPort }}
+      protocol: TCP
+  selector:
+{{ tuple $g_role . | include "helm-toolkit.utils.selectorLabels" | indent 4 }}
+{{- end }}

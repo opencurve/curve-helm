@@ -1,0 +1,21 @@
+{{- if .Values.mds.enabled }}
+{{- $g_role := "mds" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: mds-service
+spec:
+  type: ClusterIP
+  clusterIP: None  # headless service
+  ports:
+    - name: mds-server
+      port: {{ .Values.mds.port }}
+      targetPort: {{ .Values.mds.port }}
+      protocol: TCP
+    - name: mds-dummy
+      port: {{ .Values.mds.dummyPort }}
+      targetPort: {{ .Values.mds.dummyPort }}
+      protocol: TCP
+  selector:
+{{ tuple $g_role . | include "helm-toolkit.utils.selectorLabels" | indent 4 }}
+{{- end }}

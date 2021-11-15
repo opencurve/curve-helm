@@ -1,0 +1,18 @@
+global:
+  image: opencurvedocker/curvefs:beta
+  imagePullPolicy: IfNotPresent
+
+etcd:
+  enabled: true
+  replicas: 3
+
+mds:
+  enabled: true
+  replicas: 3
+
+metaserver:
+  enabled: false
+  # logDir: /mnt/logs
+  # dataDir: /mnt/data
+  config:
+    metaserver.loglevel: 0

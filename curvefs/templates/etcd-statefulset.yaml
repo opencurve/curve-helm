@@ -1,0 +1,106 @@
+{{- if .Values.etcd.enabled }}
+{{- $g_role := "etcd" }}
+{{- $g_prefix := printf "%s/%s" .Values.global.prefix $g_role }}  # /usr/local/curvefs/etcd
+{{- $g_config_dir := printf "%s/conf" $g_prefix }}
+{{- $g_log_dir := printf "%s/logs" $g_prefix }}
+{{- $g_data_dir := printf "%s/data" $g_prefix }}
+{{- $g_config_src := printf "%s/conf/%s.conf" .Values.global.prefix $g_role }}
+{{- $g_config_dst := printf "%s/conf/%s.conf" $g_prefix $g_role }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $g_role }}
+  labels:
+{{ tuple $g_role . | include "helm-toolkit.utils.metadataLabels" | indent 4 }}
+spec:
+  replicas: {{ .Values.etcd.replicas }}
+  serviceName: etcd-service
+  updateStrategy:
+    type: OnDelete
+  selector:
+    matchLabels:
+{{ tuple $g_role . | include "helm-toolkit.utils.selectorLabels" | indent 6 }}
+  template:
+    metadata:
+      labels:
+{{ tuple $g_role . | include "helm-toolkit.utils.selectorLabels" | indent 8 }}
+    spec:
+      nodeSelector:
+{{ toYaml .Values.etcd.nodeSelector | indent 8 }}
+      initContainers:
+        - name: etcd-initializer
+          image: {{ .Values.global.image }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          env:
+            - name: CURVEFS_COMPONENT_PREFIX
+              value: {{ $g_prefix }}
+            - name: CURVEFS_COMPONENT_ROLE
+              value: {{ $g_role }}
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          command:  # replace-config.sh src dst
+            - "/bin/bash"
+            - {{ $g_prefix }}/sbin/replace-config.sh
+            - {{ $g_config_src }}
+            - {{ $g_config_dst }}
+          volumeMounts:
+            - name: scripts-volume
+              mountPath: {{ $g_prefix }}/sbin/replace-config.sh
+              subPath: replace-config.sh
+              readOnly: true
+            - name: config-volume
+              mountPath: {{ $g_config_dir }}
+      containers:
+        - name: etcd
+          image: {{ .Values.global.image }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          env:
+            - name: TZ
+              value: Asia/Hangzhou
+          args:
+            - "--role"
+            - {{ $g_role }}
+          ports:
+            - name: peer-port
+              containerPort: {{ .Values.etcd.port }}
+              protocol: TCP
+            - name: client-port
+              containerPort: {{  .Values.etcd.clientPort }}
+              protocol: TCP
+          volumeMounts:
+            - name: scripts-volume
+              mountPath: {{ $g_prefix }}/sbin/replace-config.sh
+              subPath: replace-config.sh
+              readOnly: true
+            - name: config-volume
+              mountPath: {{ $g_config_dir }}
+            {{- if .Values.etcd.logDir }}
+            - name: log-volume
+              mountPath: {{ $g_log_dir }}
+              readOnly: false
+            {{- end }}
+            {{- if .Values.etcd.dataDir }}
+            - name: data-volume
+              mountPath: {{ $g_data_dir }}
+              readOnly: false
+            {{- end }}
+      volumes:
+        - name: config-volume
+          emptyDir: {}
+        - name: scripts-volume
+          configMap:
+            name: curvefs-scripts
+            defaultMode: 0555
+        {{- if .Values.etcd.logDir }}
+        - name: log-volume
+          hostPath:
+            path: {{ .Values.etcd.logDir }}
+        {{- end }}
+        {{- if .Values.etcd.dataDir }}
+        - name: data-volume
+          hostPath:
+            path: {{ .Values.etcd.dataDir }}
+        {{- end }}
+{{- end }}
