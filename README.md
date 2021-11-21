@@ -1,9 +1,20 @@
-Curve-Helm
+Name
 ===
 
-Curve-Helm helps deploy Curve cluster orchestrated by Kubernetes
+curve-helm - Helps deploy Curve cluster orchestrated by Kubernetes.
 
-> NOTE: This library is **not** yet production ready.
+Status
+===
+
+This library is **not** yet production ready.
+
+Table of Contents
+===
+
+* [Name](#name)
+* [Status](#status)
+* [Requirement](#requirement)
+* [Quick Start](#quick-start) 
 
 Requirement
 ---
@@ -13,11 +24,12 @@ Requirement
 | [kubernetes](https://kubernetes.io/docs/setup/production-environment/tools/) | v1.22.* |
 | [helm](https://helm.sh/docs/intro/install/)                                  | v3.*    | 
 
+[Back to TOC](#table-of-contents)
  
 Quick Start
 ---
 
-#### Step1: Prepare toplogy configure
+#### Step1: Prepare topology configure
 
 ```shell
 $ vi topology.yaml
@@ -47,13 +59,15 @@ metaserver:
 #### Step2: Add labels to Kubernetes node
 
 ```shell
-$ kubectl label node <NODENAME> curvefs-etcd=true 
-$ kubectl label node <NODENAME> curvefs-mds=true 
-$ kubectl label node <NODENAME> curvefs-metaserver=true 
+$ kubectl label node <nodename> curvefs-etcd=true 
+$ kubectl label node <nodename> curvefs-mds=true 
+$ kubectl label node <nodename> curvefs-metaserver=true 
 ```
 
-#### Step3: Deploy cluster
+#### Step3: Deploy cluster by helm
 
 ```shell
 $ helm upgrade --install curvefs-release ./curvefs -f topology.yaml -n curvefs --create-namespace
 ```
+
+[Back to TOC](#table-of-contents)
